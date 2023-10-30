@@ -1,0 +1,76 @@
+# Service Tabby
+apiVersion: v1
+kind: Service
+metadata:
+  name: tabby
+  namespace: tabby
+spec:
+  type: NodePort
+  selector:
+    app: tabby
+  ports:
+    - name: frontend
+      protocol: TCP
+      port: 8080
+      targetPort: frontend
+      nodePort: 30080
+---
+# Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tabby
+  namespace: tabby
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: tabby
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: tabby
+    spec:
+      containers:
+      - args:
+        - serve
+        - --model
+        - TabbyML/SantaCoder-1B
+        - --device
+        - cuda
+        env:
+        - name: FOO
+          value: BAR
+        image: hcaoextr/tabbyml-jetson:v0.4.0
+        imagePullPolicy: IfNotPresent
+        name: tabby
+        ports:
+        - containerPort: 8080
+          name: frontend
+          protocol: TCP
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /data
+          name: tabby-data
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: tabby-data
+        hostPath:
+          path: /home/test/.tabby
+          type: Directory
