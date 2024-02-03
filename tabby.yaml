@@ -87,10 +87,11 @@ spec:
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
           volumeMounts:
-            - mountPath: /data
-              name: tabby-data
-            - mountPath: /data/config.toml
-              name: tabby-config
+            - name: tabby-data
+              mountPath: /data
+            - name: tabby-config
+              mountPath: /data/config.toml
+              subPath: config.toml
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
@@ -103,4 +104,5 @@ spec:
           configMap:
             name: tabby-config-toml
             defaultMode: 0755
+
 
