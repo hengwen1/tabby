@@ -65,7 +65,7 @@ spec:
         - args:
             - serve
             - --model
-            - TabbyML/StarCoder-3B
+            - TabbyML/DeepseekCoder-6.7B
             - --device
             - cuda
           env:
